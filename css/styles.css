@@ -336,6 +336,28 @@ a {
   color: var(--muted);
 }
 
+.subtitle-small {
+  margin: 6px 0 12px;
+  color: var(--muted);
+}
+
+.visitor-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.visitor-controls input {
+  flex: 1 1 240px;
+}
+
+.visitor-meta {
+  margin: 6px 0;
+  color: var(--muted);
+}
+
 /* =========================
    Projects
 ========================= */
@@ -608,6 +630,39 @@ footer {
 .project-search:focus {
   border-color: rgba(71, 152, 251, 0.65);
   box-shadow: 0 0 0 4px rgba(71, 152, 251, 0.18);
+}
+
+.project-select {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 11px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  outline: none;
+}
+
+.project-select option {
+  background: var(--panel);
+  color: var(--text);
+}
+
+:root[data-theme="light"] .project-select {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] .project-select {
+  color-scheme: dark;
+}
+
+.project-select:focus {
+  border-color: rgba(71, 152, 251, 0.65);
+  box-shadow: 0 0 0 4px rgba(71, 152, 251, 0.18);
+}
+
+.filter-hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.96rem;
 }
 
 .empty-state {

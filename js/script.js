@@ -51,6 +51,72 @@ $("themeToggle").addEventListener("click", () => {
 })();
 
 // ===========================
+// Visitor state + session timer
+// ===========================
+(function initVisitorState() {
+  const nameInput = $("visitorName");
+  const saveBtn = $("saveVisitorName");
+  const clearBtn = $("clearVisitorName");
+  const welcome = $("visitorWelcome");
+  const timer = $("sessionTimer");
+  const visitCountEl = $("visitCount");
+
+  if (
+    !nameInput ||
+    !saveBtn ||
+    !clearBtn ||
+    !welcome ||
+    !timer ||
+    !visitCountEl
+  ) {
+    return;
+  }
+
+  const savedName = localStorage.getItem("visitorName") || "";
+  if (savedName) {
+    nameInput.value = savedName;
+    welcome.textContent = `Welcome back, ${savedName}.`;
+  }
+
+  const currentCount = Number(localStorage.getItem("visitCount") || "0") + 1;
+  localStorage.setItem("visitCount", String(currentCount));
+  visitCountEl.textContent = String(currentCount);
+
+  function updateWelcome(name) {
+    welcome.textContent = name ? `Welcome, ${name}.` : "Welcome, guest.";
+  }
+
+  saveBtn.addEventListener("click", () => {
+    const name = nameInput.value.trim();
+    if (name.length < 2) {
+      showToast("Name should be at least 2 characters");
+      return;
+    }
+    localStorage.setItem("visitorName", name);
+    updateWelcome(name);
+    showToast("Name saved");
+  });
+
+  clearBtn.addEventListener("click", () => {
+    localStorage.removeItem("visitorName");
+    nameInput.value = "";
+    updateWelcome("");
+    showToast("Saved name removed");
+  });
+
+  const start = Date.now();
+  function updateTimer() {
+    const elapsedSeconds = Math.floor((Date.now() - start) / 1000);
+    const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, "0");
+    const seconds = String(elapsedSeconds % 60).padStart(2, "0");
+    timer.textContent = `${minutes}:${seconds}`;
+  }
+
+  updateTimer();
+  window.setInterval(updateTimer, 1000);
+})();
+
+// ===========================
 // Mobile nav toggle
 // ===========================
 const navToggle = $("navToggle");
@@ -126,16 +192,31 @@ $("contactForm").addEventListener("submit", (e) => {
 $("year").textContent = String(new Date().getFullYear());
 
 // ===========================
-// Assignment 2
+// Assignment 3
 // ===========================
-// Project search / filter
+// Project search / filter / sort
 (function initProjectSearch() {
   const search = $("projectSearch");
   const clearBtn = $("clearSearch");
+  const levelSelect = $("projectLevel");
+  const sortSelect = $("projectSort");
+  const hint = $("projectHint");
   const empty = $("projectsEmpty");
+  const grid = document.querySelector(".projects-grid");
   const cards = Array.from(document.querySelectorAll(".project.card"));
 
-  if (!search || !clearBtn || !empty || cards.length === 0) return;
+  if (
+    !search ||
+    !clearBtn ||
+    !levelSelect ||
+    !sortSelect ||
+    !hint ||
+    !empty ||
+    !grid ||
+    cards.length === 0
+  ) {
+    return;
+  }
 
   function normalize(s) {
     return (s || "").toLowerCase().trim();
@@ -143,26 +224,58 @@ $("year").textContent = String(new Date().getFullYear());
 
   function applyFilter() {
     const q = normalize(search.value);
+    const level = levelSelect.value;
+    const sortBy = sortSelect.value;
     let shown = 0;
+
+    const sortedCards = [...cards].sort((a, b) => {
+      const yearA = Number(a.getAttribute("data-year") || "0");
+      const yearB = Number(b.getAttribute("data-year") || "0");
+      const nameA = normalize(a.querySelector("h3")?.textContent);
+      const nameB = normalize(b.querySelector("h3")?.textContent);
+
+      if (sortBy === "oldest") return yearA - yearB;
+      if (sortBy === "name") return nameA.localeCompare(nameB);
+      return yearB - yearA;
+    });
+
+    sortedCards.forEach((card) => grid.appendChild(card));
 
     cards.forEach((card) => {
       const text = normalize(card.textContent);
       const tags = normalize(card.getAttribute("data-tags"));
-      const match = q === "" || text.includes(q) || tags.includes(q);
+      const cardLevel = normalize(card.getAttribute("data-level"));
+      const searchMatch = q === "" || text.includes(q) || tags.includes(q);
+      const levelMatch = level === "all" || cardLevel === level;
+      const match = searchMatch && levelMatch;
 
       card.style.display = match ? "" : "none";
       if (match) shown += 1;
     });
 
+    const levelLabel =
+      level === "all"
+        ? "all levels"
+        : `${level.charAt(0).toUpperCase()}${level.slice(1)} level`;
+    const queryLabel = q ? ` with keyword "${q}"` : "";
+    hint.textContent =
+      shown > 0
+        ? `Showing ${shown} project(s) for ${levelLabel}${queryLabel}.`
+        : "No projects matched your current filter and search settings.";
+
     empty.hidden = shown !== 0;
   }
 
   search.addEventListener("input", applyFilter);
+  levelSelect.addEventListener("change", applyFilter);
+  sortSelect.addEventListener("change", applyFilter);
   clearBtn.addEventListener("click", () => {
     search.value = "";
+    levelSelect.value = "all";
+    sortSelect.value = "newest";
     search.focus();
     applyFilter();
-    showToast("Search cleared");
+    showToast("Project filters reset");
   });
 
   applyFilter();
@@ -178,7 +291,7 @@ $("year").textContent = String(new Date().getFullYear());
 // - Caches last successful quote to reduce API calls
 // - Falls back to local quotes if rate-limited/offline
 // ===========================
-(async function initDevQuote(){
+(async function initDevQuote() {
   const statusEl = $("quoteStatus");
   const quoteEl = $("quoteText");
   const authorEl = $("quoteAuthor");
@@ -186,20 +299,32 @@ $("year").textContent = String(new Date().getFullYear());
 
   if (!statusEl || !quoteEl || !authorEl || !refreshBtn) return;
 
-  const FALLBACK_QUOTES = [["Code is like humor. When you have to explain it, it’s bad.", "Cory House"], ["First, solve the problem. Then, write the code.", "John Johnson"], ["Simplicity is the soul of efficiency.", "Austin Freeman"], ["Make it work, make it right, make it fast.", "Kent Beck"], ["Programs must be written for people to read, and only incidentally for machines to execute.", "Harold Abelson"]];
+  const FALLBACK_QUOTES = [
+    [
+      "Code is like humor. When you have to explain it, it’s bad.",
+      "Cory House",
+    ],
+    ["First, solve the problem. Then, write the code.", "John Johnson"],
+    ["Simplicity is the soul of efficiency.", "Austin Freeman"],
+    ["Make it work, make it right, make it fast.", "Kent Beck"],
+    [
+      "Programs must be written for people to read, and only incidentally for machines to execute.",
+      "Harold Abelson",
+    ],
+  ];
 
-  function setQuote(text, author){
+  function setQuote(text, author) {
     quoteEl.textContent = `“${text}”`;
     authorEl.textContent = author ? `— ${author}` : "";
     quoteEl.hidden = false;
     authorEl.hidden = !author;
   }
 
-  function setStatus(text){
+  function setStatus(text) {
     statusEl.textContent = text || "";
   }
 
-  function saveCache(text, author){
+  function saveCache(text, author) {
     try {
       localStorage.setItem("lastQuoteText", text);
       localStorage.setItem("lastQuoteAuthor", author || "");
@@ -207,27 +332,30 @@ $("year").textContent = String(new Date().getFullYear());
     } catch (_e) {}
   }
 
-  function loadCache(){
+  function loadCache() {
     try {
       const t = localStorage.getItem("lastQuoteText");
       if (!t) return null;
       return {
         text: t,
         author: localStorage.getItem("lastQuoteAuthor") || "",
-        time: Number(localStorage.getItem("lastQuoteTime") || "0")
+        time: Number(localStorage.getItem("lastQuoteTime") || "0"),
       };
     } catch (_e) {
       return null;
     }
   }
 
-  function randomFallback(){
-    const [text, author] = FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
+  function randomFallback() {
+    const [text, author] =
+      FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
     return { text, author };
   }
 
-  async function fetchGitHubZen(){
-    const res = await fetch("https://api.github.com/zen", { cache: "no-store" });
+  async function fetchGitHubZen() {
+    const res = await fetch("https://api.github.com/zen", {
+      cache: "no-store",
+    });
     if (!res.ok) {
       // 403 is common when rate-limited
       throw new Error(`Request failed (${res.status})`);
@@ -237,7 +365,7 @@ $("year").textContent = String(new Date().getFullYear());
     return { text, author: "GitHub Zen" };
   }
 
-  async function loadQuote(forceNetwork = false){
+  async function loadQuote(forceNetwork = false) {
     // Loading state
     statusEl.classList.add("loading");
     setStatus("Loading…");

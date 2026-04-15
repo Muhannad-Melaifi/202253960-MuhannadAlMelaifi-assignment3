@@ -126,6 +126,38 @@
                 <li class="chip">Git & GitHub</li>
               </ul>
             </div>
+
+            <div class="card" aria-live="polite">
+              <h3>Visitor Preferences</h3>
+              <p class="subtitle-small">
+                Save your name for a personalized greeting and track your
+                session time.
+              </p>
+              <div class="visitor-controls">
+                <label class="sr-only" for="visitorName">Visitor name</label>
+                <input
+                  id="visitorName"
+                  type="text"
+                  placeholder="Enter your name"
+                  maxlength="40"
+                  autocomplete="nickname"
+                />
+                <button class="btn" id="saveVisitorName" type="button">
+                  Save name
+                </button>
+                <button class="btn" id="clearVisitorName" type="button">
+                  Clear
+                </button>
+              </div>
+              <p class="visitor-meta" id="visitorWelcome">Welcome, guest.</p>
+              <p class="visitor-meta">
+                Session time: <span id="sessionTimer">00:00</span>
+              </p>
+              <p class="visitor-meta">
+                Visits on this browser: <span id="visitCount">0</span>
+              </p>
+            </div>
+
             <div class="card api-card" aria-live="polite">
               <div class="api-head">
                 <h3>Developer Quote</h3>
@@ -157,8 +189,27 @@
               placeholder="Search projects (e.g., Java, Flutter, database)..."
               autocomplete="off"
             />
+
+            <label class="sr-only" for="projectLevel">Filter by level</label>
+            <select id="projectLevel" class="project-select">
+              <option value="all">All Levels</option>
+              <option value="beginner">Beginner</option>
+              <option value="advanced">Advanced</option>
+            </select>
+
+            <label class="sr-only" for="projectSort">Sort projects</label>
+            <select id="projectSort" class="project-select">
+              <option value="newest">Sort: Newest first</option>
+              <option value="oldest">Sort: Oldest first</option>
+              <option value="name">Sort: Name A-Z</option>
+            </select>
+
             <button class="btn" id="clearSearch" type="button">Clear</button>
           </div>
+
+          <p class="filter-hint" id="projectHint" aria-live="polite">
+            Showing all projects.
+          </p>
 
           <p class="empty-state" id="projectsEmpty" hidden>
             No projects found. Try a different keyword.
@@ -168,6 +219,8 @@
             <article
               class="project card"
               data-tags="flutter dart php mysql api json database triggers procedures admin guest leaderboard"
+              data-level="advanced"
+              data-year="2025"
             >
               <div class="project-img-wrap">
                 <img
@@ -206,6 +259,8 @@
             <article
               class="project card"
               data-tags="java javafx desktop reservation scheduling validation role-based access conflict double-booking facilities"
+              data-level="beginner"
+              data-year="2024"
             >
               <div class="project-img-wrap">
                 <img
