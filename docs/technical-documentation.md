@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Assignment 3 builds on Assignment 1 by adding more interactivity and modern JavaScript behavior:
+This Assignment 3 builds on Assignment 1+2 by adding more interactivity and modern JavaScript behavior:
 
 ### New features added in Assignment 3
 
@@ -15,7 +15,7 @@ This Assignment 3 builds on Assignment 1 by adding more interactivity and modern
    - Loading indicator while fetching API data
    - Friendly error message if API fails
 
-The Assignment 1 features remain (theme toggle saved in localStorage, greeting message, form validation + toast notifications).
+The Assignment 1+2 features remain (theme toggle saved in localStorage, greeting message, form validation + toast notifications).
 
 ---
 
@@ -169,7 +169,7 @@ Recommended final check before submission:
 
 ---
 
-## Existing Assignment 1 Features (still included)
+## Previously Completed Features 
 
 - **Theme toggle** with preference saved in `localStorage`
 - **Greeting message** based on time of day

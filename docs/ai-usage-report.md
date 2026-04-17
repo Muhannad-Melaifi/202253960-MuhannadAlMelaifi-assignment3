@@ -103,4 +103,4 @@ Using AI in a controlled way improved my practical skills in:
 
 AI support was used intentionally for planning, refinement, and documentation. The final submission reflects human-reviewed implementation choices, tested behaviors, and transparent reporting of AI involvement.
 
-I can explain all final features (API flow, project logic rules, and localStorage state) without relying on AI-generated explanations.
+
